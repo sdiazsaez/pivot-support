@@ -20,7 +20,7 @@ trait ParentPivotModel {
     }
 
     private function hasPivot_getPivotDescription(): PivotDescription {
-        $result = new PivotDescription($this->table.'_pìvot', 'foreign_value', 'id');
+        $result = new PivotDescription($this->table.'_pivot', 'foreign_value', 'id');
         if(Instance::hasInterface($this, HasPivotDescription::class)) {
             $result = $this->getPivotDescription();
         }
