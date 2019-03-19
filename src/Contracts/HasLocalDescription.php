@@ -4,8 +4,8 @@ namespace Larangular\PivotSupport\Contracts;
 
 use Larangular\PivotSupport\Model\RelationshipDescription;
 
-interface HasPivotDescription {
+interface HasLocalDescription {
 
-    public function pivotDescription(): RelationshipDescription;
+    public function localDescription(): RelationshipDescription;
 
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Larangular\PivotSupport\Pivot;
+namespace Larangular\PivotSupport\Model;
 
-class PivotDescription {
+class RelationshipDescription {
 
     public $related;
     public $foreignKey;
