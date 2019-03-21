@@ -4,7 +4,6 @@ namespace Larangular\PivotSupport\Traits;
 
 use Larangular\PivotSupport\Contracts\HasForeignDescription;
 use Larangular\PivotSupport\Contracts\HasLocalDescription;
-use Larangular\PivotSupport\Contracts\HasPivotDescription;
 use Larangular\PivotSupport\Model\RelationshipDescription;
 use Larangular\Support\Facades\Instance;
 
