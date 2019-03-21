@@ -14,7 +14,7 @@ trait SuggestedRelationship {
 
     public function getSuggestedRelationshipAttribute() {
         if (!Instance::instanceOf($this, \Illuminate\Database\Eloquent\Model::class) || !Instance::hasTrait($this,
-                ParentPivotModel::class) || is_null($this->pivot)) {
+                ParentPivotModel::class) || !is_null($this->pivot)) {
             return null;
         }
 
