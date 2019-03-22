@@ -11,13 +11,15 @@ class PivotFillerRoute {
             return;
         }
 
-        Route::prefix($name.'/pivot-filler')
-             ->middleware('web')
-             ->group(function () use ($class) {
-                Route::get('/', $class . '@index');
-                Route::get('show', $class . '@show');
-                Route::post('store', $class . '@store');
-            });
+        Route::group([
+            'prefix'     => $name . '/pivot-filler',
+            'middleware' => 'web',
+            'as'         => $name.'.pivot-filler.',
+        ], function () use($class) {
+            Route::get('/', $class . '@index')->name('index');
+            Route::get('show', $class . '@show')->name('show');
+            Route::post('store', $class . '@store')->name('store');
+        });
     }
 
 }
