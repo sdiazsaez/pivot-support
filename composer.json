@@ -19,5 +19,15 @@
         "psr-4": {
             "Larangular\\PivotSupport\\": "./src"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Larangular\\PivotSupport\\PivotSupportServiceProvider"
+            ],
+            "aliases": {
+                "PivotFillerRoute": "Larangular\\PivotSupport\\Facades\\PivotFillerRoute"
+            }
+        }
     }
 }
