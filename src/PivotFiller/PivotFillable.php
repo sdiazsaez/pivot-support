@@ -2,19 +2,19 @@
 
 namespace Larangular\PivotSupport\PivotFiller;
 
-class PivotFillerController {
+abstract class PivotFillable {
 
-    private $routePrefix = 'sura.vehicles.refactor.';
-    private $companyAssets;
-    private $makerPivot;
     private $localModel;
     private $foreignModel;
     private $pivotModel;
 
+    public abstract function localModel();
+    public abstract function foreignModel();
+    public abstract function pivotModel();
+
+
     public function __construct() {
         $this->companyAssets = $this->getCompanyAssets();
-        $this->localModel = new $this->localModel();
-
     }
 
     public function index() {
@@ -64,6 +64,5 @@ class PivotFillerController {
 
         return $this->pivotModel;
     }
-
 
 }

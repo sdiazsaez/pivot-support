@@ -14,7 +14,9 @@ class PivotFillerRoute {
         Route::prefix($name.'/pivot-filler')
              ->middleware('web')
              ->group(function () use ($class) {
-                Route::get('/', $class . '@PivotFillerIndex');
+                Route::get('/', $class . '@index');
+                Route::get('show', $class . '@show');
+                Route::post('store', $class . '@store');
             });
     }
 

@@ -16,18 +16,6 @@ trait ParentPivotModel {
         return $this->hasOne($pivotDescription->related, $pivotDescription->foreignKey, $pivotDescription->localKey);
     }
 
-    public function local() {
-        $database = $this->getConnection()->getDatabaseName();
-        return $this->belongsToMany(
-            \MsdAssets\Banks\Models\Bank::class,
-            $database.'.'.$this->table.'_pivot',
-            'local_value',
-            'foreign_value',
-            'id',
-            'id'
-        );
-    }
-
     private function parentPivotModel_getPivotDescription(): RelationshipDescription {
         $result = new RelationshipDescription(__CLASS__.'Pivot', 'foreign_value', 'id');
         if(Instance::hasInterface($this, HasPivotDescription::class)) {

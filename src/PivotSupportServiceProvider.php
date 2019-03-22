@@ -8,6 +8,7 @@ use Larangular\PivotSupport\PivotFiller\PivotFillerRoute;
 class PivotSupportServiceProvider extends ServiceProvider {
 
     public function boot() {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views/pivot-filler', 'pivot-filler');
     }
 
     public function register() {
