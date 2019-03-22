@@ -11,10 +11,10 @@ class PivotFillerRoute {
             return;
         }
 
-        Route::prefix('pivot-filler/'.$name)
+        Route::prefix($name.'/pivot-filler')
              ->middleware('web')
              ->group(function () use ($class) {
-                Route::get('index', $class . '@PivotFillerIndex');
+                Route::get('/', $class . '@PivotFillerIndex');
             });
     }
 
