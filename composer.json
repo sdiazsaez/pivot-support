@@ -11,7 +11,8 @@
     "require": {
         "php": "^7.1.3",
         "illuminate/support": "^5.7",
-        "larangular/support": "0.1.*"
+        "larangular/support": "0.1.*",
+        "larangular/routing-controller": "0.1.*"
     },
     "require-dev": {
     },

@@ -12,6 +12,7 @@ abstract class PivotFillable {
     private $foreignModel;
     private $pivotModel;
     private $routePrefix;
+    private $foreignGateway;
 
     public abstract function routePrefix();
 
@@ -21,6 +22,8 @@ abstract class PivotFillable {
 
     public abstract function pivotModel();
 
+    public abstract function foreignGateway();
+
 
     public function __construct() {
         $this->foreignAssets = $this->getCompanyAssets();
@@ -28,7 +31,7 @@ abstract class PivotFillable {
         $this->routePrefix = $this->routePrefix();
     }
 
-    public function index() {
+    public function index(Request $request) {
         return view('pivot-filler::index', [
             'foreignAssets' => $this->foreignAssets,
             'localAssets'   => $this->localAssets,
@@ -36,25 +39,43 @@ abstract class PivotFillable {
         ]);
     }
 
-    public function show($id) {
-        $asset = $this->getCompanyAsset($id);
-        $sourceMakers = $this->searchMaker($asset->marca);
-
-        return view('sura.vehicles.refactor.index', [
-            'companyAssets' => $this->foreignAssets,
-            'companyAsset'  => $asset->toArray(),
-        ]);
+    public function localModelStore(Request $request) {
+        if ($request->has('name')) {
+            $this->localModelInstance()
+                 ->create([
+                     'name' => $request->get('name'),
+                 ])
+                 ->save();
+        }
+        return redirect(route($this->routePrefix . '.pivot-filler.index'));
     }
 
     public function store(Request $request) {
-        if($request->has('foreign_value') && $request->has('local_value')) {
-            $item = $this->pivotModelInstance()->create([
-                'foreign_value' => $request->input('foreign_value'),
-                'local_value' => $request->input('local_value')
-            ]);
-            $item->save();
+        $data = $request->all();
+        if ($request->has('pivots')) {
+            foreach ($data['pivots'] as $pivot) {
+                $this->pivotStore($pivot);
+            }
+        } else {
+            $this->pivotStore($data);
         }
         return redirect(route($this->routePrefix . '.pivot-filler.index'));
+    }
+
+    private function pivotStore($data) {
+        if (!array_key_exists('foreign_value', $data) || !array_key_exists('local_value', $data)) {
+            return;
+        }
+
+        $foreignValue = $data['foreign_value'];
+        $localValue = $data['local_value'];
+
+        $this->pivotModelInstance()
+             ->create([
+                 'foreign_value' => $foreignValue,
+                 'local_value'   => $localValue,
+             ])
+             ->save();
     }
 
     private function getCompanyAssets() {
@@ -69,7 +90,8 @@ abstract class PivotFillable {
 
     private function getFormOptions() {
         return [
-            'action' => route($this->routePrefix . '.pivot-filler.store'),
+            'local-action' => route($this->routePrefix . '.pivot-filler.create-local'),
+            'action'       => route($this->routePrefix . '.pivot-filler.store'),
         ];
     }
 
@@ -89,6 +111,14 @@ abstract class PivotFillable {
             $this->foreignModel = new $name;
         }
         return $this->foreignModel;
+    }
+
+    private function foreignGatewayInstance() {
+        if (is_null($this->foreignGateway)) {
+            $name = $this->foreignGateway();
+            $this->foreignGateway = new $name;
+        }
+        return $this->foreignGateway;
     }
 
     private function pivotModelInstance() {

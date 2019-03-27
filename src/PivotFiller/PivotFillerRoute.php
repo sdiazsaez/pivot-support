@@ -19,6 +19,7 @@ class PivotFillerRoute {
             Route::get('/', $class . '@index')->name('index');
             Route::get('show', $class . '@show')->name('show');
             Route::post('store', $class . '@store')->name('store');
+            Route::post('create-local', $class . '@localModelStore')->name('create-local');
         });
     }
 
