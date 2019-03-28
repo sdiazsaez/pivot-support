@@ -26,16 +26,19 @@ abstract class PivotFillable {
 
 
     public function __construct() {
-        $this->foreignAssets = $this->getCompanyAssets();
+        //$this->foreignAssets = $this->getCompanyAssets();
         $this->localAssets = $this->getLocalAssets();
         $this->routePrefix = $this->routePrefix();
     }
 
     public function index(Request $request) {
+        $this->foreignAssets = $this->getCompanyAssets($request->all());
+
         return view('pivot-filler::index', [
             'foreignAssets' => $this->foreignAssets,
             'localAssets'   => $this->localAssets,
             'form'          => $this->getFormOptions(),
+            'tableColumns' => $this->getTableColumns(),
         ]);
     }
 
@@ -78,9 +81,12 @@ abstract class PivotFillable {
              ->save();
     }
 
-    private function getCompanyAssets() {
+    private function getCompanyAssets(array $filter) {
+        return $this->foreignGatewayInstance()->entries($filter);
+        /*
         return $this->foreignModelInstance()
                     ->all();
+        */
     }
 
     private function getLocalAssets() {
@@ -130,4 +136,33 @@ abstract class PivotFillable {
         return $this->pivotModel;
     }
 
+
+    private function getTableColumns(): array {
+        return [
+            'foreign-model' => $this->getForeignModelAttributes(),
+            'pivot-model' => $this->getPivotModelAttributes(),
+            'local-model' => $this->getLocalModelAttributes()
+        ];
+    }
+
+    private function getForeignModelAttributes(): array {
+        $response = $this->foreignGatewayInstance()->entry(1);
+        return array_keys($response->toArray());
+    }
+
+    private function getPivotModelAttributes(): array {
+        $response = $this->pivotModelInstance()->where(['local_value' => 1])->first();
+        if(is_null($response)) {
+            return [
+                'foreign_value',
+                'local_value'
+            ];
+        }
+        return array_keys($response->toArray());
+    }
+
+    private function getLocalModelAttributes(): array {
+        $response = $this->localModelInstance()->where('id', 1)->first();
+        return array_keys($response->toArray());
+    }
 }

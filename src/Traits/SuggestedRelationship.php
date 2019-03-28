@@ -5,6 +5,7 @@ namespace Larangular\PivotSupport\Traits;
 use Larangular\PivotSupport\Contracts\HasForeignDescription;
 use Larangular\PivotSupport\Contracts\HasLocalDescription;
 use Larangular\PivotSupport\Contracts\HasPivotDescription;
+use Larangular\PivotSupport\Contracts\HasSuggestedRelationshipFilter;
 use Larangular\PivotSupport\Model\RelationshipDescription;
 use Larangular\Support\Facades\Instance;
 
@@ -24,7 +25,18 @@ trait SuggestedRelationship {
         $related = $localDescription->related;
         $model = new $related;
 
-        return $model->where($localDescription->foreignKey, 'like', $term)->first();
+        $filter = $this->pivotModel_getSuggestedRelationshipFilter();
+        array_push($filter, [$localDescription->foreignKey, 'like', $term]);
+
+        return $model->where($filter)
+                     ->first();
+    }
+
+    private function pivotModel_getSuggestedRelationshipFilter(): array {
+        if (Instance::hasInterface($this, HasSuggestedRelationshipFilter::class)) {
+            return $this->suggestedRelationshipFilter();
+        }
+        return [];
     }
 
     private function pivotModel_getLocalDescription(): RelationshipDescription {

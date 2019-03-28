@@ -1,6 +1,6 @@
 @extends('pivot-filler::container')
 @section('pivot-filler.content')
-    <div class="container" style="padding: 30px 0px;">
+    <div style="padding: 20px;">
         <style>
             .demo {
                 border: 1px solid #C0C0C0;
@@ -26,14 +26,27 @@
         <table class="demo">
             <thead>
             <tr>
+                @foreach($tableColumns as $key => $value)
+                    <th colspan="{{count($value)}}">{{$key}}</th>
+                    <th>--</th>
+            @endforeach
+            <!--
                 <th colspan="3">foreign model</th>
                 <th colspan="2">pivot model</th>
                 <th colspan="3">local model</th>
-                <th colspan="1">actions</th>
+                -->
+                <th colspan="4">actions</th>
             </tr>
             </thead>
             <thead>
             <tr>
+                @foreach($tableColumns as $columns)
+                    @foreach($columns as $column)
+                        <th>{{$column}}</th>
+                    @endforeach
+                    <th></th>
+            @endforeach
+            <!--
                 <th>id</th>
                 <th>name</th>
                 <th>provider value</th>
@@ -42,33 +55,37 @@
                 <th>suggested relationship</th>
                 <th>id</th>
                 <th>name</th>
+                -->
                 <th>store</th>
                 <th>new</th>
+                <th>list</th>
                 <th>store selected</th>
             </tr>
             </thead>
             <tbody>
             @foreach($foreignAssets as $asset)
                 <tr>
+                    @foreach($tableColumns as $columName => $columns)
+                        @foreach($columns as $column)
+                            @if($columName === 'local-model')
+                                <td>{{$asset['suggested_relationship'][$column]}}</td>
+                            @else
+                                <td>{{$asset[$column]}}</td>
+                            @endif
+                        @endforeach
+                        <td></td>
+                @endforeach
+                <!--
                     <td>{{$asset->id}}</td>
                     <td>{{$asset['name']}}</td>
                     <td>{{$asset->provider_value}}</td>
                     <td>{{@$asset->pivot->foreign_value}}</td>
                     <td>{{@$asset->pivot->local_value}}</td>
-                    <td>
-                        @if(!isset($asset->pivot) && !isset($asset->suggested_relationship))
-                            <select class="custom-select">
-                                <option selected>Choose...</option>
-                                @foreach($localAssets as $localAsset)
-                                    <option value="{{$localAsset['id']}}">
-                                        {{$localAsset['name']}}--{{$localAsset['id']}}
-                                    </option>
-                                @endforeach
-                            </select>
-                        @endif
-                    </td>
+
+
                     <td>{{@$asset->suggested_relationship->id}}</td>
                     <td>{{@$asset->suggested_relationship->name}}</td>
+                    -->
                     <td>
                         @if(!isset($asset->pivot))
                             <form method="post" action="{{ $form['action'] }}">
@@ -94,6 +111,18 @@
                                     </div>
                                 </div>
                             </form>
+                        @endif
+                    </td>
+                    <td>
+                        @if(!isset($asset->pivot) && !isset($asset->suggested_relationship))
+                            <select class="custom-select">
+                                <option selected>Choose...</option>
+                                @foreach($localAssets as $localAsset)
+                                    <option value="{{$localAsset['id']}}">
+                                        {{$localAsset}}
+                                    </option>
+                                @endforeach
+                            </select>
                         @endif
                     </td>
                     <td>
