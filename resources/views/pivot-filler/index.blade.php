@@ -20,9 +20,15 @@
             }
         </style>
         <form method="post" action="{{ $form['action'] }}">
-            <input type="submit">
+            <input type="submit" value="save pivots">
             <div id="all-pivots-form"></div>
         </form>
+
+        <form method="post" action="{{ $form['local-action'] }}">
+            <input type="submit" value="save locals">
+            <div id="all-local-form"></div>
+        </form>
+
         <table class="demo">
             <thead>
             <tr>
@@ -59,7 +65,7 @@
                 <th>store</th>
                 <th>new</th>
                 <th>list</th>
-                <th>store selected</th>
+                <th>work selected</th>
             </tr>
             </thead>
             <tbody>
@@ -67,11 +73,16 @@
                 <tr>
                     @foreach($tableColumns as $columName => $columns)
                         @foreach($columns as $column)
-                            @if($columName === 'local-model')
+                            @switch($columName)
+                                @case('pivot-model')
+                                <td>{{$asset['pivot'][$column]}}</td>
+                                @break
+                                @case('local-model')
                                 <td>{{$asset['suggested_relationship'][$column]}}</td>
-                            @else
+                                @break
+                                @default
                                 <td>{{$asset[$column]}}</td>
-                            @endif
+                            @endswitch
                         @endforeach
                         <td></td>
                 @endforeach
@@ -104,12 +115,8 @@
                     <td>
                         @if(!isset($asset->pivot) && !isset($asset->suggested_relationship))
                             <form method="post" action="{{ $form['local-action'] }}">
-                                <div class="input-group mb-3">
-                                    <input type="hidden" name="name" value="{{$asset->name}}">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="submit">create local</button>
-                                    </div>
-                                </div>
+                                <input type="text" name="foreign_id" value="{{$asset->id}}">
+                                <button class="btn btn-outline-secondary" type="submit">create local</button>
                             </form>
                         @endif
                     </td>
@@ -165,7 +172,7 @@
 
             function updateFormPivots(pivots) {
                 $('.pivot-field').remove();
-                pivots.forEach(function(value, index){
+                pivots.forEach(function (value, index) {
                     $('#all-pivots-form').append(`
                     <div class="pivot-field">
                         <input type="hidden" name="pivots[${index}][foreign_value]" value="${value.foreign_value}">
@@ -176,12 +183,25 @@
                 });
             }
 
-            function updateGlobalForm(){
-                updateFormPivots(getPivots());
+            function updateFormLocals(foreignIds) {
+                $('.local-form-field').remove();
+                foreignIds.forEach(function (value, index) {
+                    $('#all-local-form').append(`
+                    <div class="local-form-field">
+                        <input type="text" name="foreign_id[${index}][foreign_value]" value="${value.foreign_value}">
+                    </div>
+                    `);
+                });
+            }
+
+            function updateGlobalForm() {
+                var checked = getPivots();
+                updateFormPivots(checked);
+                updateFormLocals(checked);
             }
 
             function registerCheckboxChange() {
-                $('.to-save :checkbox').change(function(){
+                $('.to-save :checkbox').change(function () {
                     updateGlobalForm();
                 });
             }

@@ -3,6 +3,7 @@
 namespace Larangular\PivotSupport\PivotFiller;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 abstract class PivotFillable {
 
@@ -43,14 +44,27 @@ abstract class PivotFillable {
     }
 
     public function localModelStore(Request $request) {
-        if ($request->has('name')) {
-            $this->localModelInstance()
-                 ->create([
-                     'name' => $request->get('name'),
-                 ])
-                 ->save();
+        if($request->has('foreign_id')) {
+            $foreignModel = $this->foreignGatewayInstance()->entry($request->get('foreign_id'));
+            $localAttributes = $this->getLocalModelAttributes();
+            $attributes = [];
+            foreach($localAttributes as $attribute) {
+                if($attribute === 'id') {
+                    continue;
+                }
+
+                $path = $attribute;
+                if(strpos($attribute, '_id') !== false) {
+                    $path = str_replace('_id', '', $attribute).'.pivot.local_value';
+                }
+
+                $attributes[$attribute] = Arr::get($foreignModel, $path);
+            }
+
+            $this->localModelInstance()->create($attributes)->save();
         }
-        return redirect(route($this->routePrefix . '.pivot-filler.index'));
+        return redirect(redirect()->getUrlGenerator()->previous());
+        //return redirect(route($this->routePrefix . '.pivot-filler.index'));
     }
 
     public function store(Request $request) {
@@ -147,7 +161,14 @@ abstract class PivotFillable {
 
     private function getForeignModelAttributes(): array {
         $response = $this->foreignGatewayInstance()->entry(1);
-        return array_keys($response->toArray());
+        $attributes = [];
+        foreach($response->toArray() as $key => $value) {
+            if(is_array($value) || $key === 'pivot' || $key === 'suggested_relationship') {
+                continue;
+            }
+            $attributes[] = $key;
+        }
+        return $attributes;
     }
 
     private function getPivotModelAttributes(): array {
