@@ -186,11 +186,13 @@
             function updateFormLocals(foreignIds) {
                 $('.local-form-field').remove();
                 foreignIds.forEach(function (value, index) {
-                    $('#all-local-form').append(`
-                    <div class="local-form-field">
-                        <input type="text" name="foreign_id[${index}][foreign_value]" value="${value.foreign_value}">
-                    </div>
+                    if (value.local_value === undefined) {
+                        $('#all-local-form').append(`
+                            <div class="local-form-field">
+                                <input type="text" name="foreign_id[${index}][foreign_value]" value="${value.foreign_value}">
+                            </div>
                     `);
+                    }
                 });
             }
 
