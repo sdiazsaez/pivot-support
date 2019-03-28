@@ -39,32 +39,24 @@ abstract class PivotFillable {
             'foreignAssets' => $this->foreignAssets,
             'localAssets'   => $this->localAssets,
             'form'          => $this->getFormOptions(),
-            'tableColumns' => $this->getTableColumns(),
+            'tableColumns'  => $this->getTableColumns(),
         ]);
     }
 
     public function localModelStore(Request $request) {
-        if($request->has('foreign_id')) {
-            $foreignModel = $this->foreignGatewayInstance()->entry($request->get('foreign_id'));
-            $localAttributes = $this->getLocalModelAttributes();
-            $attributes = [];
-            foreach($localAttributes as $attribute) {
-                if($attribute === 'id') {
-                    continue;
+        if ($request->has('foreign_id')) {
+            $foreignId = $request->get('foreign_id');
+            if (is_array($foreignId)) {
+                foreach ($foreignId as $item) {
+                    $this->localStore($item);
                 }
-
-                $path = $attribute;
-                if(strpos($attribute, '_id') !== false) {
-                    $path = str_replace('_id', '', $attribute).'.pivot.local_value';
-                }
-
-                $attributes[$attribute] = Arr::get($foreignModel, $path);
+            } else {
+                $this->localStore($foreignId);
             }
-
-            $this->localModelInstance()->create($attributes)->save();
         }
-        return redirect(redirect()->getUrlGenerator()->previous());
-        //return redirect(route($this->routePrefix . '.pivot-filler.index'));
+        return redirect(redirect()
+            ->getUrlGenerator()
+            ->previous());
     }
 
     public function store(Request $request) {
@@ -76,7 +68,32 @@ abstract class PivotFillable {
         } else {
             $this->pivotStore($data);
         }
-        return redirect(route($this->routePrefix . '.pivot-filler.index'));
+        return redirect(redirect()
+            ->getUrlGenerator()
+            ->previous());
+        //return redirect(route($this->routePrefix . '.pivot-filler.index'));
+    }
+
+    private function localStore($data) {
+        $foreignModel = $this->foreignGatewayInstance()
+                             ->entry($data);
+        $localAttributes = $this->getLocalModelAttributes();
+        $attributes = [];
+        foreach ($localAttributes as $attribute) {
+            if ($attribute === 'id') {
+                continue;
+            }
+
+            $path = $attribute;
+            if (strpos($attribute, '_id') !== false) {
+                $path = str_replace('_id', '', $attribute) . '.pivot.local_value';
+            }
+
+            $attributes[$attribute] = Arr::get($foreignModel, $path);
+        }
+        $this->localModelInstance()
+             ->create($attributes)
+             ->save();
     }
 
     private function pivotStore($data) {
@@ -96,7 +113,8 @@ abstract class PivotFillable {
     }
 
     private function getCompanyAssets(array $filter) {
-        return $this->foreignGatewayInstance()->entries($filter);
+        return $this->foreignGatewayInstance()
+                    ->entries($filter);
         /*
         return $this->foreignModelInstance()
                     ->all();
@@ -154,16 +172,17 @@ abstract class PivotFillable {
     private function getTableColumns(): array {
         return [
             'foreign-model' => $this->getForeignModelAttributes(),
-            'pivot-model' => $this->getPivotModelAttributes(),
-            'local-model' => $this->getLocalModelAttributes()
+            'pivot-model'   => $this->getPivotModelAttributes(),
+            'local-model'   => $this->getLocalModelAttributes(),
         ];
     }
 
     private function getForeignModelAttributes(): array {
-        $response = $this->foreignGatewayInstance()->entry(1);
+        $response = $this->foreignGatewayInstance()
+                         ->entry(1);
         $attributes = [];
-        foreach($response->toArray() as $key => $value) {
-            if(is_array($value) || $key === 'pivot' || $key === 'suggested_relationship') {
+        foreach ($response->toArray() as $key => $value) {
+            if (is_array($value) || $key === 'pivot' || $key === 'suggested_relationship') {
                 continue;
             }
             $attributes[] = $key;
@@ -172,18 +191,22 @@ abstract class PivotFillable {
     }
 
     private function getPivotModelAttributes(): array {
-        $response = $this->pivotModelInstance()->where(['local_value' => 1])->first();
-        if(is_null($response)) {
+        $response = $this->pivotModelInstance()
+                         ->where(['local_value' => 1])
+                         ->first();
+        if (is_null($response)) {
             return [
                 'foreign_value',
-                'local_value'
+                'local_value',
             ];
         }
         return array_keys($response->toArray());
     }
 
     private function getLocalModelAttributes(): array {
-        $response = $this->localModelInstance()->where('id', 1)->first();
+        $response = $this->localModelInstance()
+                         ->where('id', 1)
+                         ->first();
         return array_keys($response->toArray());
     }
 }

@@ -65,7 +65,10 @@
                 <th>store</th>
                 <th>new</th>
                 <th>list</th>
-                <th>work selected</th>
+                <th>
+                    work selected
+                    <input id="checkbox-all" type="checkbox">
+                </th>
             </tr>
             </thead>
             <tbody>
@@ -78,7 +81,27 @@
                                 <td>{{$asset['pivot'][$column]}}</td>
                                 @break
                                 @case('local-model')
-                                <td>{{$asset['suggested_relationship'][$column]}}</td>
+                                <td>
+                                    {{$asset['suggested_relationship'][$column]}}
+                                    <?php
+                                    if (strpos($column, '_id') !== false) {
+                                        $path = str_replace('_id', '', $column) . '.name';
+                                        echo array_get($asset['suggested_relationship'], $path);
+                                    }
+                                    ?>
+                                </td>
+                                @break
+                                @case('foreign-model')
+
+                                <td>
+                                    {{$asset[$column]}}
+                                    <?php
+                                    if (strpos($column, '_id') !== false) {
+                                        $path = str_replace('_id', '', $column) . '.name';
+                                        echo array_get($asset, $path);
+                                    }
+                                    ?>
+                                </td>
                                 @break
                                 @default
                                 <td>{{$asset[$column]}}</td>
@@ -126,7 +149,7 @@
                                 <option selected>Choose...</option>
                                 @foreach($localAssets as $localAsset)
                                     <option value="{{$localAsset['id']}}">
-                                        {{$localAsset}}
+                                        {{$localAsset['name']}}--{{$localAsset}}
                                     </option>
                                 @endforeach
                             </select>
@@ -186,10 +209,10 @@
             function updateFormLocals(foreignIds) {
                 $('.local-form-field').remove();
                 foreignIds.forEach(function (value, index) {
-                    if (value.local_value === undefined) {
+                    if (value.local_value === '') {
                         $('#all-local-form').append(`
                             <div class="local-form-field">
-                                <input type="text" name="foreign_id[${index}][foreign_value]" value="${value.foreign_value}">
+                                <input type="text" name="foreign_id[]" value="${value.foreign_value}">
                             </div>
                     `);
                     }
@@ -202,8 +225,17 @@
                 updateFormLocals(checked);
             }
 
+            function setCheckboxs(value) {
+                $('.to-save :checkbox').attr('checked', value);
+            }
+
             function registerCheckboxChange() {
                 $('.to-save :checkbox').change(function () {
+                    updateGlobalForm();
+                });
+
+                $('#checkbox-all').change(function(event){
+                    setCheckboxs($(event.target).prop('checked'));
                     updateGlobalForm();
                 });
             }
