@@ -27,6 +27,7 @@ abstract class PivotFillable {
 
 
     public function __construct() {
+        ini_set('max_execution_time', 300);
         //$this->foreignAssets = $this->getCompanyAssets();
         $this->localAssets = $this->getLocalAssets();
         $this->routePrefix = $this->routePrefix();

@@ -21,7 +21,7 @@ trait SuggestedRelationship {
 
         $localDescription = $this->pivotModel_getLocalDescription();
 
-        $term = '%' . $this->{$localDescription->localKey} . '%';
+        $term = $this->{$localDescription->localKey};
         $related = $localDescription->related;
         $model = new $related;
 
