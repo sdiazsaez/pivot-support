@@ -1,22 +1,22 @@
 @extends('pivot-filler::container')
 @section('pivot-filler.content')
-    <div style="padding: 20px;">
+    <div style="padding: 5px;">
         <style>
             .demo {
                 border: 1px solid #C0C0C0;
                 border-collapse: collapse;
-                padding: 5px;
+                padding: 4px;
             }
 
             .demo th {
                 border: 1px solid #C0C0C0;
-                padding: 5px;
+                padding: 4px;
                 background: #F0F0F0;
             }
 
             .demo td {
                 border: 1px solid #C0C0C0;
-                padding: 5px;
+                padding: 4px;
             }
         </style>
         <form method="post" action="{{ $form['action'] }}">

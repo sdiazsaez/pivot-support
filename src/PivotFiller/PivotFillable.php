@@ -14,6 +14,7 @@ abstract class PivotFillable {
     private $pivotModel;
     private $routePrefix;
     private $foreignGateway;
+    private $localGateway;
 
     public abstract function routePrefix();
 
@@ -25,16 +26,17 @@ abstract class PivotFillable {
 
     public abstract function foreignGateway();
 
+    public abstract function localGateway();
+
 
     public function __construct() {
         ini_set('max_execution_time', 300);
-        //$this->foreignAssets = $this->getCompanyAssets();
-        $this->localAssets = $this->getLocalAssets();
         $this->routePrefix = $this->routePrefix();
     }
 
     public function index(Request $request) {
         $this->foreignAssets = $this->getCompanyAssets($request->all());
+        $this->localAssets = $this->getLocalAssets($request->all());
 
         return view('pivot-filler::index', [
             'foreignAssets' => $this->foreignAssets,
@@ -122,9 +124,12 @@ abstract class PivotFillable {
         */
     }
 
-    private function getLocalAssets() {
+    private function getLocalAssets(array $filter) {
+        return $this->localGatewayInstance()
+                    ->entries($filter);
+        /*
         return $this->localModelInstance()
-                    ->all();
+                    ->all();*/
     }
 
     private function getFormOptions() {
@@ -134,6 +139,14 @@ abstract class PivotFillable {
         ];
     }
 
+
+    private function localGatewayInstance() {
+        if (is_null($this->localGateway)) {
+            $name = $this->localGateway();
+            $this->localGateway = new $name;
+        }
+        return $this->localGateway;
+    }
 
     private function localModelInstance() {
         if (is_null($this->localModel)) {
@@ -205,9 +218,13 @@ abstract class PivotFillable {
     }
 
     private function getLocalModelAttributes(): array {
+        $response = $this->foreignGatewayInstance()
+                         ->entry(1);
+        return array_keys($response);
+        /*
         $response = $this->localModelInstance()
                          ->where('id', 1)
                          ->first();
-        return array_keys($response->toArray());
+        return array_keys($response->toArray());*/
     }
 }

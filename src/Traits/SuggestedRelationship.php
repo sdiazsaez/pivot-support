@@ -8,6 +8,7 @@ use Larangular\PivotSupport\Contracts\HasPivotDescription;
 use Larangular\PivotSupport\Contracts\HasSuggestedRelationshipFilter;
 use Larangular\PivotSupport\Model\RelationshipDescription;
 use Larangular\Support\Facades\Instance;
+use Illuminate\Support\Facades\DB;
 
 trait SuggestedRelationship {
 
@@ -20,16 +21,33 @@ trait SuggestedRelationship {
         }
 
         $localDescription = $this->pivotModel_getLocalDescription();
-
-        $term = $this->{$localDescription->localKey};
         $related = $localDescription->related;
         $model = new $related;
 
-        $filter = $this->pivotModel_getSuggestedRelationshipFilter();
-        array_push($filter, [$localDescription->foreignKey, 'like', $term]);
+        $response = $model->where($this->pivotModel_getFilter($localDescription))->first();
 
-        return $model->where($filter)
-                     ->first();
+        if(is_null($response)) {
+            $response = $model->where($this->pivotModel_getFilter($localDescription, false))->first();
+        }
+
+        return $response;
+    }
+
+    private function pivotModel_getFilter(RelationshipDescription $description, bool $strict = true): array {
+        $filter = $this->pivotModel_getSuggestedRelationshipFilter();
+        $term = $this->{$description->localKey};
+        if(!$strict) {
+            $term = '%'.$term.'%';
+        }
+
+
+        array_push($filter, [
+            DB::raw('REPLACE('.$description->foreignKey.', " ", "")'),
+            'like',
+            DB::raw('REPLACE("'.$term.'", " ", "")'),
+        ]);
+
+        return $filter;
     }
 
     private function pivotModel_getSuggestedRelationshipFilter(): array {
