@@ -125,6 +125,10 @@ abstract class PivotFillable {
     }
 
     private function getLocalAssets(array $filter) {
+        $filter = $this->getLocalFilter($this->foreignAssets[0], $filter);
+        if(count($filter) > 0) {
+            $filter['orderBy'] = 'name';
+        }
         return $this->localGatewayInstance()
                     ->entries($filter);
         /*
@@ -218,13 +222,26 @@ abstract class PivotFillable {
     }
 
     private function getLocalModelAttributes(): array {
-        $response = $this->foreignGatewayInstance()
+        $response = $this->localGatewayInstance()
                          ->entry(1);
-        return array_keys($response);
+        return array_keys($response->toArray());
         /*
         $response = $this->localModelInstance()
                          ->where('id', 1)
                          ->first();
         return array_keys($response->toArray());*/
+    }
+
+    private function getLocalFilter($foreignAsset, $filters): array {
+        $response = [];
+        foreach($filters as $attribute => $value) {
+            $path = $attribute;
+            if (strpos($attribute, '_id') !== false) {
+                $path = str_replace('_id', '', $attribute) . '.pivot.local_value';
+            }
+
+            $response[$attribute] = Arr::get($foreignAsset, $path);
+        }
+        return $response;
     }
 }

@@ -136,7 +136,7 @@
                         @endif
                     </td>
                     <td>
-                        @if(!isset($asset->pivot) && !isset($asset->suggested_relationship))
+                        @if(!isset($asset->pivot))
                             <form method="post" action="{{ $form['local-action'] }}">
                                 <input type="text" name="foreign_id" value="{{$asset->id}}">
                                 <button class="btn btn-outline-secondary" type="submit">create local</button>

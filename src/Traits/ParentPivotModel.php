@@ -16,6 +16,12 @@ trait ParentPivotModel {
         return $this->hasOne($pivotDescription->related, $pivotDescription->foreignKey, $pivotDescription->localKey);
     }
 
+    public function scopeByLocal($query, $localId) {
+        return $query->whereHas('pivot', function($query) use($localId) {
+            $query->where('local_value', $localId);
+        });
+    }
+
     private function parentPivotModel_getPivotDescription(): RelationshipDescription {
         $result = new RelationshipDescription(__CLASS__.'Pivot', 'foreign_value', 'id');
         if(Instance::hasInterface($this, HasPivotDescription::class)) {

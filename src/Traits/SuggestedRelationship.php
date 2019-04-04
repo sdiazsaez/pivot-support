@@ -24,13 +24,15 @@ trait SuggestedRelationship {
         $related = $localDescription->related;
         $model = new $related;
 
-        $response = $model->where($this->pivotModel_getFilter($localDescription))->first();
+        return $model->where($this->pivotModel_getFilter($localDescription))->first();
 
+        /*
         if(is_null($response)) {
             $response = $model->where($this->pivotModel_getFilter($localDescription, false))->first();
         }
 
         return $response;
+        */
     }
 
     private function pivotModel_getFilter(RelationshipDescription $description, bool $strict = true): array {
@@ -42,9 +44,9 @@ trait SuggestedRelationship {
 
 
         array_push($filter, [
-            DB::raw('REPLACE('.$description->foreignKey.', " ", "")'),
+            DB::raw('REPLACE(REPLACE(REPLACE('.$description->foreignKey.', " ", ""), "-", ""), ".", "")'),
             'like',
-            DB::raw('REPLACE("'.$term.'", " ", "")'),
+            DB::raw('REPLACE(REPLACE(REPLACE("'.$term.'", " ", ""), "-", ""), ".", "")'),
         ]);
 
         return $filter;
