@@ -126,7 +126,7 @@ abstract class PivotFillable {
 
     private function getLocalAssets(array $filter) {
         $filter = $this->getLocalFilter($this->foreignAssets[0], $filter);
-        if(count($filter) > 0) {
+        if (count($filter) > 0) {
             $filter['orderBy'] = 'name';
         }
         return $this->localGatewayInstance()
@@ -220,16 +220,16 @@ abstract class PivotFillable {
 
     private function getLocalModelAttributes(): array {
         $response = $this->localGatewayInstance()
-                         ->entry(1);
-        if(is_null($response)){
+                         ->entries(['limit' => 1]);
+        if (is_null($response)) {
             return [];
         }
-        return array_keys($response->toArray());
+        return array_keys($response->first()->toArray());
     }
 
     private function getLocalFilter($foreignAsset, $filters): array {
         $response = [];
-        foreach($filters as $attribute => $value) {
+        foreach ($filters as $attribute => $value) {
             $path = $attribute;
             if (strpos($attribute, '_id') !== false) {
                 $path = str_replace('_id', '', $attribute) . '.pivot.local_value';
