@@ -131,9 +131,6 @@ abstract class PivotFillable {
         }
         return $this->localGatewayInstance()
                     ->entries($filter);
-        /*
-        return $this->localModelInstance()
-                    ->all();*/
     }
 
     private function getFormOptions() {
@@ -224,12 +221,10 @@ abstract class PivotFillable {
     private function getLocalModelAttributes(): array {
         $response = $this->localGatewayInstance()
                          ->entry(1);
+        if(is_null($response)){
+            return [];
+        }
         return array_keys($response->toArray());
-        /*
-        $response = $this->localModelInstance()
-                         ->where('id', 1)
-                         ->first();
-        return array_keys($response->toArray());*/
     }
 
     private function getLocalFilter($foreignAsset, $filters): array {
