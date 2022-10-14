@@ -24,30 +24,32 @@ trait SuggestedRelationship {
         $related = $localDescription->related;
         $model = new $related;
 
-        return $model->where($this->pivotModel_getFilter($localDescription))->first();
 
-        /*
-        if(is_null($response)) {
-            $response = $model->where($this->pivotModel_getFilter($localDescription, false))->first();
-        }
-
-        return $response;
-        */
+        $filter = $this->pivotModel_getSuggestedRelationshipFilter();
+        $descriptionFilter = $this->pivotModel_getFilter($localDescription);
+        return $model->where($filter)->whereRaw($descriptionFilter['query'], $descriptionFilter['bindings'])->first();
     }
 
-    private function pivotModel_getFilter(RelationshipDescription $description, bool $strict = true): array {
+    private function pivotModel_getFilter(RelationshipDescription $description, bool $strict = true) {
         $filter = $this->pivotModel_getSuggestedRelationshipFilter();
         $term = $this->{$description->localKey};
         if(!$strict) {
             $term = '%'.$term.'%';
         }
 
+        $replaceableTerms = [" ", "-", "."];
+        $replaceFn = function ($entry, $replaceTerms) {
+            $r = '?';
+            foreach($replaceTerms as $term) {
+                $r = 'REPLACE('.$r.', "'.$term.'", "")';
+            }
+            return $r;
+        };
 
-        array_push($filter, [
-            DB::raw('REPLACE(REPLACE(REPLACE('.$description->foreignKey.', " ", ""), "-", ""), ".", "")'),
-            'like',
-            DB::raw('REPLACE(REPLACE(REPLACE("'.$term.'", " ", ""), "-", ""), ".", "")'),
-        ]);
+        return [
+            'query' => DB::raw($replaceFn($description->foreignKey, $replaceableTerms).' like '.$replaceFn($term, $replaceableTerms)),
+            'bindings' => [$description->foreignKey, '"'.$term.'"']
+        ];
 
         return $filter;
     }
