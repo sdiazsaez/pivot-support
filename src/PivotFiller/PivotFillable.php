@@ -193,8 +193,8 @@ abstract class PivotFillable {
     }
 
     private function getForeignModelAttributes(): array {
-        $response = $this->foreignGatewayInstance()
-                         ->entry(1);
+        $response = $this->foreignGatewayInstance()->model()::inRandomOrder()->first();
+
         $attributes = [];
         foreach ($response->toArray() as $key => $value) {
             if (is_array($value) || $key === 'pivot' || $key === 'suggested_relationship') {
