@@ -78,11 +78,11 @@
                         @foreach($columns as $column)
                             @switch($columName)
                                 @case('pivot-model')
-                                <td>{{$asset['pivot'][$column]}}</td>
+                                <td>{{ data_get($asset, 'pivot.'.$column) }}</td>
                                 @break
                                 @case('local-model')
                                 <td>
-                                    {{$asset['suggested_relationship'][$column]}}
+                                    {{ data_get($asset, 'suggested_relationship.'.$column) }}
                                     <?php
                                     if (strpos($column, '_id') !== false) {
                                         $path = str_replace('_id', '', $column) . '.name';
